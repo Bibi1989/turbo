@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ROLE {
+  SUPER_ADMIN
+  ADMIN
+  USER
+}
+
+model User {
+  id       String  @id @default(uuid())
+  name     String
+  email    String  @unique
+  phone    String?
+  password String
+
+  Events Event[]
+
+  role   Role   @relation(fields: [roleId], references: [id])
+  roleId String
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+model Role {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  permissions Permission[]
+  updatedAt   DateTime     @updatedAt
+  createdAt   DateTime     @default(now())
+  User        User[]
+}
+
+model Permission {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  Role      Role?    @relation(fields: [roleId], references: [id])
+  roleId    String?
+}
+
+model Address {
+  id          String  @id @default(uuid())
+  address     String?
+  streetName  String  @unique
+  houseNumber String  @unique
+  city        String  @unique
+  zipCode     String  @unique
+  region      String?
+  country     String  @unique
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  Venue     Venue[]
+}
+
+model Venue {
+  id      String @id @default(uuid())
+  name    String
+  address String
+
+  Address   Address @relation(fields: [addressId], references: [id])
+  addressId String
+
+  Events Event[]
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+model Catering {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  menus       Json[]
+  link        String
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  Events    Event[]
+}
+
+model Technical {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  equipments  Json[]
+  link        String
+
+  Events Event[]
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id          String  @id @default(uuid())
+  title       String
+  description String?
+  location    String?
+
+  Venue   Venue?  @relation(fields: [venueId], references: [id])
+  venueId String?
+
+  participant Json[]
+
+  Catering   Catering? @relation(fields: [cateringId], references: [id])
+  cateringId String?
+
+  Technical   Technical? @relation(fields: [technicalId], references: [id])
+  technicalId String?
+
+  startDate DateTime?
+  endDate   DateTime?
+
+  isCancelled Boolean @default(false)
+  isFullDay   Boolean @default(false)
+  isRecurring Boolean @default(false)
+  recurrence  String? @default("DAILY")
+  coverImage  Json?
+  coverVideo  Json?
+  coverAudio  Json?
+  images      Json?
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  User   User   @relation(fields: [userId], references: [id])
+  userId String
+}

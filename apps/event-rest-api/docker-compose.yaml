@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: event
+    ports:
+      - '5432:5432'
+    volumes:
+      - event:/var/lib/postgresql/data
+    networks:
+      - event
+    # healthcheck:
+    #   test: [ "CMD-SHELL", "pg_isready -U root" ]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+      
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - event
+  
+  backend:
+    build: .
+    ports:
+      - '5000:5000'
+    environment:
+      DATABASE_URL: postgresql://postgres:root@db:5432/event?schema=public
+      NODE_ENV: development
+      PORT: 5000
+    depends_on:
+      - db
+    networks:
+      - event
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: sh -c ./start.sh
+
+volumes:
+  event:
+
+networks:
+  event:
+    driver: bridge

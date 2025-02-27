@@ -1,0 +1,22 @@
+services:
+  frontend-1:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    command: npm run dev
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+
+  frontend-2:
+    build: .
+    ports:
+      - "3001:3000"
+    volumes:
+      - .:/app
+    command: npm run dev
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
